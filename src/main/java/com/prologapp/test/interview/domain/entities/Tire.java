@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Builder(toBuilder = true)
@@ -44,6 +46,7 @@ public class Tire {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private TireStatusEnum status;
 
 }

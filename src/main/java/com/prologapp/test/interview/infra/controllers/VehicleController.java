@@ -1,12 +1,12 @@
 package com.prologapp.test.interview.infra.controllers;
 
 import com.prologapp.test.interview.domain.entities.Vehicle;
+import com.prologapp.test.interview.infra.dtos.CreateVehicleRequest;
+import com.prologapp.test.interview.infra.dtos.CreateVehicleResponse;
 import com.prologapp.test.interview.infra.services.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,8 +26,12 @@ public class VehicleController {
         return ResponseEntity.ok(new Vehicle());
     }
 
-    public ResponseEntity<Vehicle> create() {
-        return ResponseEntity.ok(new Vehicle());
+    @PostMapping
+    public ResponseEntity<CreateVehicleResponse> create(@RequestBody CreateVehicleRequest newVehicle) {
+        return ResponseEntity.ok(
+                CreateVehicleResponse
+                        .fromEntity(vehicleService.create(newVehicle))
+        );
     }
 
 }
