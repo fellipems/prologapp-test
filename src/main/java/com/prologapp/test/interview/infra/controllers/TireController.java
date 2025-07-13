@@ -1,4 +1,4 @@
-package com.prologapp.test.interview.infra.controller;
+package com.prologapp.test.interview.infra.controllers;
 
 public class TireController {
 

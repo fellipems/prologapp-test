@@ -1,4 +1,4 @@
 package com.prologapp.test.interview.domain.enums;
 
-public interface TirePosition {
+public enum TirePositionEnum {
 }

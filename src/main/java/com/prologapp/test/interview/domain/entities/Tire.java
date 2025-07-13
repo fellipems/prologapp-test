@@ -1,8 +1,9 @@
-package com.prologapp.test.interview.domain.entity;
+package com.prologapp.test.interview.domain.entities;
 
-import com.prologapp.test.interview.domain.enums.TireStatus;
+import com.prologapp.test.interview.domain.enums.TireStatusEnum;
 import jakarta.persistence.*;
 
+@Entity
 public class Tire {
 
     @Id
@@ -13,17 +14,13 @@ public class Tire {
     private String fireNumber;
 
     @Column(nullable = false)
-    private String brand;
+    private Brand brand;
 
     @Column(name = "pressure_psi", nullable = false)
     private int pressurePsi;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String position;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TireStatus status;
+    private TireStatusEnum status;
 
 }
