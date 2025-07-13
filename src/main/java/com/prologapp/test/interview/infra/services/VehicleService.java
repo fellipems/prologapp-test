@@ -4,11 +4,11 @@ import com.prologapp.test.interview.domain.entities.Brand;
 import com.prologapp.test.interview.domain.entities.Vehicle;
 import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
 import com.prologapp.test.interview.infra.dtos.CreateVehicleRequest;
-import com.prologapp.test.interview.infra.exceptions.BrandNotFoundException;
-import com.prologapp.test.interview.infra.exceptions.BrandNotSpecifiedException;
-import com.prologapp.test.interview.infra.exceptions.VehicleAlreadyExistsWithGivenPlateException;
-import com.prologapp.test.interview.infra.exceptions.VehicleCreateTypeIsNotVehicleException;
+import com.prologapp.test.interview.infra.dtos.VehicleResponse;
+import com.prologapp.test.interview.infra.dtos.VehicleWithTiresResponse;
+import com.prologapp.test.interview.infra.exceptions.*;
 import com.prologapp.test.interview.infra.mappers.VehicleMapper;
+import com.prologapp.test.interview.infra.mappers.VehicleResponseMapper;
 import com.prologapp.test.interview.infra.repositories.BrandRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleRepository;
 import jakarta.validation.Valid;
@@ -28,8 +28,12 @@ public class VehicleService {
 
     private final VehicleMapper vehicleMapper;
 
-    public List<Vehicle> getAllVehicles() {
-        return vehicleRepository.findAll();
+    private final VehicleResponseMapper vehicleResponseMapper;
+
+    public List<VehicleResponse> getAllVehicles() {
+        List<Vehicle> vehicles = vehicleRepository.findAll();
+
+        return vehicleResponseMapper.toResponseList(vehicles);
     }
 
     public Vehicle create(@Valid CreateVehicleRequest newVehicle) {
@@ -53,5 +57,12 @@ public class VehicleService {
         Vehicle vehicle = vehicleMapper.toEntity(newVehicle, brand);
 
         return vehicleRepository.save(vehicle);
+    }
+
+    public VehicleWithTiresResponse findByIdWithTires(Long id) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
+
+        return vehicleResponseMapper.toVehicleWithTiresResponse(vehicle);
     }
 }

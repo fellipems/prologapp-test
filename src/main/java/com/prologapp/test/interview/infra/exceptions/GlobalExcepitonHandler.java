@@ -45,6 +45,18 @@ public class GlobalExcepitonHandler {
                 );
     }
 
+    @ExceptionHandler(VehicleNotFoundException.class)
+    public ResponseEntity<ApiError> handleVehicleNotFoundException(VehicleNotFoundException ex, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(
+                        ApiError.of(
+                                HttpStatus.NOT_FOUND.value(),
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
     @ExceptionHandler(VehicleCreateTypeIsNotVehicleException.class)
     public ResponseEntity<ApiError> handleVehicleCreateTypeIsNotVehicleException(VehicleCreateTypeIsNotVehicleException ex, WebRequest request) {
         return ResponseEntity
