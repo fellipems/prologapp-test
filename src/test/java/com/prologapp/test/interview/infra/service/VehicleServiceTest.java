@@ -1,0 +1,194 @@
+package com.prologapp.test.interview.infra.service;
+
+import com.prologapp.test.interview.domain.entities.Brand;
+import com.prologapp.test.interview.domain.entities.Vehicle;
+import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
+import com.prologapp.test.interview.domain.enums.TireStatusEnum;
+import com.prologapp.test.interview.domain.enums.VehicleStatusEnum;
+import com.prologapp.test.interview.infra.dtos.CreateVehicleRequest;
+import com.prologapp.test.interview.infra.dtos.TireResponse;
+import com.prologapp.test.interview.infra.dtos.VehicleResponse;
+import com.prologapp.test.interview.infra.dtos.VehicleWithTiresResponse;
+import com.prologapp.test.interview.infra.exceptions.*;
+import com.prologapp.test.interview.infra.mappers.VehicleMapper;
+import com.prologapp.test.interview.infra.mappers.VehicleResponseMapper;
+import com.prologapp.test.interview.infra.repositories.BrandRepository;
+import com.prologapp.test.interview.infra.repositories.VehicleRepository;
+import com.prologapp.test.interview.infra.services.VehicleService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class VehicleServiceTest {
+
+    @Mock
+    VehicleRepository vehicleRepository;
+
+    @Mock
+    BrandRepository brandRepository;
+
+    @Mock
+    VehicleMapper vehicleMapper;
+
+    @Mock
+    VehicleResponseMapper vehicleResponseMapper;
+
+    @InjectMocks
+    VehicleService vehicleService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    @DisplayName("Deve criar veículo quando todos os dados forem válidos")
+    void shouldCreateVehicleWhenRequestIsValid() {
+        CreateVehicleRequest request = new CreateVehicleRequest(
+                "ABC1234", 1L, 1000, VehicleStatusEnum.ACTIVE, 4
+        );
+        Brand brand = new Brand(1L, "VOLVO", BrandTypeEnum.VEHICLE);
+        Vehicle vehicleEntity = mock(Vehicle.class);
+
+        when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
+        when(vehicleRepository.findByPlate("ABC1234")).thenReturn(Optional.empty());
+        when(vehicleMapper.toEntity(request, brand)).thenReturn(vehicleEntity);
+        when(vehicleRepository.save(vehicleEntity)).thenReturn(vehicleEntity);
+
+        Vehicle vehicleResult = vehicleService.create(request);
+
+        assertNotNull(vehicleResult);
+        verify(brandRepository).findById(1L);
+        verify(vehicleRepository).findByPlate("ABC1234");
+        verify(vehicleMapper).toEntity(request, brand);
+        verify(vehicleRepository).save(vehicleEntity);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando não for informado marca do veículo")
+    void shouldThrowWhenBrandIdIsNull() {
+        CreateVehicleRequest request = new CreateVehicleRequest(
+                "ABC1234", null, 1000, VehicleStatusEnum.ACTIVE, 4
+        );
+
+        assertThrows(BrandNotSpecifiedException.class, () -> vehicleService.create(request));
+        verifyNoInteractions(brandRepository, vehicleRepository, vehicleMapper);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção quando não encontrar marca com ID informado")
+    void shouldThrowWhenBrandNotFound() {
+        CreateVehicleRequest request = new CreateVehicleRequest(
+                "ABC1234", 2L, 1000, VehicleStatusEnum.ACTIVE, 4
+        );
+
+        when(brandRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(BrandNotFoundException.class, () -> vehicleService.create(request));
+        verify(brandRepository).findById(2L);
+        verifyNoMoreInteractions(vehicleRepository, vehicleMapper);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção caso seja enviado uma marca de pneu ao invés de uma marca de veículo")
+    void shouldThrowWhenBrandIsNotVehicleType() {
+        CreateVehicleRequest request = new CreateVehicleRequest(
+                "ABC1234", 3L, 1000, VehicleStatusEnum.ACTIVE, 4
+        );
+
+        Brand brand = new Brand(3L, "PIRELLI", BrandTypeEnum.TIRE);
+
+        when(brandRepository.findById(3L)).thenReturn(Optional.of(brand));
+
+        assertThrows(VehicleCreateTypeIsNotVehicleException.class, () -> vehicleService.create(request));
+        verify(brandRepository).findById(3L);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção caso tente cadastrar um veículo em que já tenha uma placa cadastrada na base de dados")
+    void shouldThrowWhenPlateAlreadyExists() {
+        CreateVehicleRequest request = new CreateVehicleRequest(
+                "ABC1234", 1L, 1000, VehicleStatusEnum.ACTIVE, 4
+        );
+
+        Brand brand = new Brand(1L, "VOLVO", BrandTypeEnum.VEHICLE);
+
+        Vehicle vehicleEntity = mock(Vehicle.class);
+
+        when(brandRepository.findById(1L)).thenReturn(Optional.of(brand));
+        when(vehicleRepository.findByPlate("ABC1234")).thenReturn(Optional.of(vehicleEntity));
+
+        assertThrows(VehicleAlreadyExistsWithGivenPlateException.class, () -> vehicleService.create(request));
+        verify(brandRepository).findById(1L);
+        verify(vehicleRepository).findByPlate("ABC1234");
+    }
+
+    @Test
+    @DisplayName("Deve retornar todos os veículos cadastrados sem os pneus")
+    void shouldReturnAllVehicles() {
+        List<Vehicle> vehicles = Arrays.asList(mock(Vehicle.class), mock(Vehicle.class));
+
+        List<VehicleResponse> vehiclesResponseList = Arrays.asList(
+                mock(VehicleResponse.class), mock(VehicleResponse.class)
+        );
+
+        when(vehicleRepository.findAll()).thenReturn(vehicles);
+        when(vehicleResponseMapper.toResponseList(vehicles)).thenReturn(vehiclesResponseList);
+
+        List<VehicleResponse> allVehicles = vehicleService.getAllVehicles();
+
+        assertEquals(2, allVehicles.size());
+        verify(vehicleRepository).findAll();
+        verify(vehicleResponseMapper).toResponseList(vehicles);
+    }
+
+    @Test
+    @DisplayName("Deve retornar veículo com id válido e com os pneus vinculados")
+    void shouldReturnVehicleWithTiresWhenIdExists() {
+        Vehicle vehicle = mock(Vehicle.class);
+
+        TireResponse tireResponse = new TireResponse(
+                1L, "FIRE123", "PIRELLI", 90, TireStatusEnum.AVAILABLE, 1
+        );
+
+        List<TireResponse> tires = List.of(tireResponse);
+
+        VehicleWithTiresResponse vehicleWithtires = new VehicleWithTiresResponse(
+                1L, "ABC1234", "VOLVO", 10000, VehicleStatusEnum.ACTIVE, 6, tires
+        );
+
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehicle));
+        when(vehicleResponseMapper.toVehicleWithTiresResponse(vehicle)).thenReturn(vehicleWithtires);
+
+        VehicleWithTiresResponse vehicleWithTiresResult = vehicleService.findByIdWithTires(1L);
+
+        assertEquals(vehicleWithtires, vehicleWithTiresResult);
+        assertNotNull(vehicleWithTiresResult.tires(), "Lista de pneus não nula");
+        assertFalse(vehicleWithTiresResult.tires().isEmpty(), "Lista de pneus não vazia");
+        assertEquals(1, vehicleWithTiresResult.tires().size());
+        assertEquals("FIRE123", vehicleWithTiresResult.tires().getFirst().fireNumber());
+
+        verify(vehicleRepository).findById(1L);
+        verify(vehicleResponseMapper).toVehicleWithTiresResponse(vehicle);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção caso veículo não exista")
+    void shouldThrowWhenVehicleNotFoundById() {
+        when(vehicleRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(VehicleNotFoundException.class, () -> vehicleService.findByIdWithTires(99L));
+        verify(vehicleRepository).findById(99L);
+    }
+
+}
