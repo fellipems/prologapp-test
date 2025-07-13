@@ -1,8 +1,13 @@
 package com.prologapp.test.interview.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
@@ -11,6 +16,10 @@ import jakarta.validation.constraints.NotNull;
                 @UniqueConstraint(columnNames = {"tire_id"})
         }
 )
+@Builder(toBuilder = true)
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class VehicleTire {
 
     @Id
@@ -19,6 +28,7 @@ public class VehicleTire {
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
+    @JsonBackReference
     private Vehicle vehicle;
 
     @ManyToOne

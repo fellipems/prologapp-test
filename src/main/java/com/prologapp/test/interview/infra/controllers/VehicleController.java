@@ -1,14 +1,13 @@
 package com.prologapp.test.interview.infra.controllers;
 
 import com.prologapp.test.interview.domain.entities.Vehicle;
-import com.prologapp.test.interview.infra.repositories.VehicleRepository;
-import lombok.AllArgsConstructor;
+import com.prologapp.test.interview.infra.services.VehicleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -16,10 +15,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VehicleController {
 
-    private final VehicleRepository vehicleRepository;
+    private final VehicleService vehicleService;
 
+    @GetMapping
     public ResponseEntity<List<Vehicle>> getAllVehicles() {
-        return ResponseEntity.ok(Collections.emptyList());
+        return ResponseEntity.ok(vehicleService.getAllVehicles());
     }
 
     public ResponseEntity<Vehicle> getVehicleById() {
