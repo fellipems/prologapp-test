@@ -9,7 +9,7 @@ Projeto desenvolvido para o teste técnico da PrologApp, utilizando principalmen
     
 -   **Java 21**
 
-- **Maven**: Gerenciar as dependências
+-   **Maven**: Gerenciar as dependências
     
 -   **PostgreSQL + Flyway**: Migrations para versionamento, tipos ENUM nativos para refletir os Enums do Java.
     
@@ -21,7 +21,7 @@ Projeto desenvolvido para o teste técnico da PrologApp, utilizando principalmen
     
 -   **JUnit 5 + Mockito**: Cobertura de testes unitários dos services, incluindo testes de exceção.
 
-## 📝 Sobre o Projeto
+## Sobre o Projeto
 
 A aplicação gerencia veículos e pneus, permitindo:
 - Cadastro e consulta de veículos (com e sem pneus aplicados)
@@ -33,7 +33,7 @@ A aplicação gerencia veículos e pneus, permitindo:
 
 ---
 
-## 🚀 Como Rodar Localmente
+## Como Rodar Localmente
 
 ### 1. **Pré-requisitos**
 - [Docker](https://www.docker.com/)
@@ -55,7 +55,7 @@ Utilize o `docker-compose.yml` já incluso no projeto:
 
 Com o banco rodando, basta rodar o projeto localmente e a API estará disponível em [http://localhost:8080](http://localhost:8080)
 
-## 📖 Documentação e Testes da API
+## Documentação e Testes da API
 
 Acesse a documentação do Swagger em:
 
@@ -66,18 +66,23 @@ Todos os endpoints, exemplos de request/response, regras de negócio e mensagens
 
 
 ## Endpoints Principais
-| entidade | método | endpoint       | descrição                                    |
-|----------|--------|----------------|----------------------------------------------|
-| veiculo  | POST   | /vehicles      | Cadastrar novo veículo                       |
-| veiculo  | GET    | /vehicles      | Listar veículos (paginado)                   |
-| veiculo  | GET    | /vehicles/{id} | Detalhar veículo e com seus pneus vinculados |
-| pneu     | POST   | /tires         | Cadastrar novo pneu                          |
-| pneu     | POST   | /tires/link    | Vincular pneu ao veículo                     |
-| pneu     | POST   | /tires/unlink  | Desvincular pneu de um veículo               |
 
 ----------
 
-## 🛠️ Decisões Técnicas & Considerações    
+| entidade | método | endpoint                | descrição                                    |
+|----------|--------|-------------------------|----------------------------------------------|
+| veiculo  | POST   | /vehicles               | Cadastrar novo veículo                       |
+| veiculo  | GET    | /vehicles               | Listar veículos (paginado)                   |
+| veiculo  | GET    | /vehicles/{id}          | Detalhar veículo e com seus pneus vinculados |
+| veiculo  | GET    | /vehicles/plate/{plate} | Detalhar um veículo buscado pela placa       |
+| veiculo  | PATCH  | /vehicles/{id}/status   | Altera o status de um veículo                |
+| veiculo  | DELETE | /vehicles/{id}          | Remove um veículo                            |
+| pneu     | POST   | /tires                  | Cadastrar novo pneu                          |
+| pneu     | POST   | /tires/link             | Vincular pneu ao veículo                     |
+| pneu     | POST   | /tires/unlink           | Desvincular pneu de um veículo               |
+| pneu     | DELETE | /tires/{id}             | Remove um pneu que está desvinculado         |
+
+## Decisões Técnicas & Considerações    
 
 ### Estrutura de Pacotes
 
