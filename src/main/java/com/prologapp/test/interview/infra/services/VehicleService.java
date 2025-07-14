@@ -3,6 +3,7 @@ package com.prologapp.test.interview.infra.services;
 import com.prologapp.test.interview.domain.entities.Brand;
 import com.prologapp.test.interview.domain.entities.Vehicle;
 import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
+import com.prologapp.test.interview.domain.enums.VehicleStatusEnum;
 import com.prologapp.test.interview.infra.dtos.CreateVehicleRequest;
 import com.prologapp.test.interview.infra.dtos.VehicleResponse;
 import com.prologapp.test.interview.infra.dtos.VehicleWithTiresResponse;
@@ -81,5 +82,14 @@ public class VehicleService {
                 .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
 
         return vehicleResponseMapper.toResponse(vehicle);
+    }
+
+    public VehicleResponse updateStatus(Long id, VehicleStatusEnum status) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
+
+        vehicle.setStatus(status);
+
+        return vehicleResponseMapper.toResponse(vehicleRepository.save(vehicle));
     }
 }

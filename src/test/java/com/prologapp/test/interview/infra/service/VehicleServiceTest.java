@@ -243,4 +243,46 @@ public class VehicleServiceTest {
         verify(vehicleRepository).findByPlate("ABC1234");
     }
 
+    @Test
+    @DisplayName("Deve atualizar o status do veículo quando existir o veículo")
+    void shouldUpdateVehicleStatusWhenVehicleExists() {
+        Long id = 1L;
+        VehicleStatusEnum status = VehicleStatusEnum.INACTIVE;
+        Vehicle vehicle = new Vehicle();
+        vehicle.setStatus(VehicleStatusEnum.ACTIVE);
+
+        Vehicle savedVehicle = new Vehicle();
+        savedVehicle.setStatus(status);
+
+        VehicleResponse response = mock(VehicleResponse.class);
+
+        when(vehicleRepository.findById(id)).thenReturn(Optional.of(vehicle));
+        when(vehicleRepository.save(vehicle)).thenReturn(savedVehicle);
+        when(vehicleResponseMapper.toResponse(savedVehicle)).thenReturn(response);
+
+        VehicleResponse result = vehicleService.updateStatus(id, status);
+
+        assertEquals(status, vehicle.getStatus());
+        assertEquals(response, result);
+        verify(vehicleRepository).findById(id);
+        verify(vehicleRepository).save(vehicle);
+        verify(vehicleResponseMapper).toResponse(savedVehicle);
+    }
+
+    @Test
+    @DisplayName("Deve lançar VehicleNotFoundException quando o veículo não existir")
+    void shouldThrowWhenVehicleNotFound() {
+        Long id = 99L;
+        VehicleStatusEnum status = VehicleStatusEnum.ACTIVE;
+
+        when(vehicleRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(VehicleNotFoundException.class,
+                () -> vehicleService.updateStatus(id, status));
+
+        verify(vehicleRepository).findById(id);
+        verify(vehicleRepository, never()).save(any());
+        verify(vehicleResponseMapper, never()).toResponse(any());
+    }
+
 }

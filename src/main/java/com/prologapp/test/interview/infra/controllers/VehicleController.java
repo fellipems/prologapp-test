@@ -104,4 +104,27 @@ public class VehicleController {
 
     }
 
+    @Operation(
+            summary = "Alterar status do veículo",
+            description = "Altera apenas o status do veículo pelo ID."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Status alterado com sucesso",
+            content = @Content(schema = @Schema(implementation = VehicleResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Veículo não encontrado",
+            content = @Content(schema = @Schema(implementation = ApiError.class))
+    )
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<VehicleResponse> updateVehicleStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateVehicleStatusRequest request) {
+
+        VehicleResponse updated = vehicleService.updateStatus(id, request.status());
+        return ResponseEntity.ok(updated);
+    }
+
 }
