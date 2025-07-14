@@ -110,7 +110,7 @@ public class VehicleService {
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
 
-        List<VehicleTire> tires = vehicle.getTires(); // ou vehicleTireRepository.findByVehicleId(id);
+        List<VehicleTire> tires = vehicle.getTires();
 
         if (!CollectionUtils.isEmpty(tires)) {
             for (VehicleTire vehicleTire : tires) {
