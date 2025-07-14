@@ -6,10 +6,7 @@ import com.prologapp.test.interview.domain.entities.Vehicle;
 import com.prologapp.test.interview.domain.entities.VehicleTire;
 import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
 import com.prologapp.test.interview.domain.enums.TireStatusEnum;
-import com.prologapp.test.interview.infra.dtos.CreateTireRequest;
-import com.prologapp.test.interview.infra.dtos.LinkTireRequest;
-import com.prologapp.test.interview.infra.dtos.TireResponse;
-import com.prologapp.test.interview.infra.dtos.UnlinkTireRequest;
+import com.prologapp.test.interview.infra.dtos.*;
 import com.prologapp.test.interview.infra.exceptions.*;
 import com.prologapp.test.interview.infra.mappers.TireMapper;
 import com.prologapp.test.interview.infra.mappers.VehicleTireMapper;
@@ -19,6 +16,8 @@ import com.prologapp.test.interview.infra.repositories.VehicleRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleTireRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -121,4 +120,11 @@ public class TireService {
 
         tireRepository.delete(tire);
     }
+
+    public Page<TireResponse> getAllTires(Pageable pageable) {
+        return tireRepository
+                .findAll(pageable)
+                .map(tireMapper::toResponseWithoutPosition);
+    }
+
 }

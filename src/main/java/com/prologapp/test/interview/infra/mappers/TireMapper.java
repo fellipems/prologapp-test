@@ -18,4 +18,8 @@ public interface TireMapper {
     @Mapping(target = "positionId", source = "positionId")
     TireResponse toResponse(Tire tire, Integer positionId);
 
+    default TireResponse toResponseWithoutPosition(Tire tire) {
+        return toResponse(tire, null);
+    }
+
 }

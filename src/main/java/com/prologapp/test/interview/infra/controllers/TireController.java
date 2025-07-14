@@ -1,9 +1,6 @@
 package com.prologapp.test.interview.infra.controllers;
 
-import com.prologapp.test.interview.infra.dtos.CreateTireRequest;
-import com.prologapp.test.interview.infra.dtos.LinkTireRequest;
-import com.prologapp.test.interview.infra.dtos.TireResponse;
-import com.prologapp.test.interview.infra.dtos.UnlinkTireRequest;
+import com.prologapp.test.interview.infra.dtos.*;
 import com.prologapp.test.interview.infra.exceptions.ApiError;
 import com.prologapp.test.interview.infra.services.TireService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +64,20 @@ public class TireController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         tireService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Listar todos os pneus",
+            description = "Retorna uma página de pneus cadastrados no sistema. Use os parâmetros de paginação: page, size e sort."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Página de pneus retornada com sucesso",
+            content = @Content(schema = @Schema(implementation = PageResponse.class))
+    )
+    @GetMapping
+    public ResponseEntity<PageResponse<TireResponse>> getAllTires(@ParameterObject Pageable pageable) {
+        return ResponseEntity.ok(PageResponse.from(tireService.getAllTires(pageable)));
     }
 
 }
