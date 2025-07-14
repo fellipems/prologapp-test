@@ -199,4 +199,48 @@ public class VehicleServiceTest {
         verify(vehicleRepository).findById(99L);
     }
 
+    @Test
+    @DisplayName("Deve retornar o veículo quando a placa for válida e existir na base mesmo se for lowerCase")
+    void shouldReturnVehicleWhenPlateExists() {
+        String plate = "aaa1234";
+        Vehicle vehicle = mock(Vehicle.class);
+        VehicleResponse response = mock(VehicleResponse.class);
+
+        when(vehicleRepository.findByPlate("AAA1234")).thenReturn(Optional.of(vehicle));
+        when(vehicleResponseMapper.toResponse(vehicle)).thenReturn(response);
+
+        VehicleResponse result = vehicleService.findByPlate(plate);
+
+        assertNotNull(result);
+        verify(vehicleRepository).findByPlate("AAA1234");
+        verify(vehicleResponseMapper).toResponse(vehicle);
+    }
+
+    @Test
+    @DisplayName("Deve lançar PlateNotSpecifiedException se a placa for vazia ou nula")
+    void shouldThrowPlateNotSpecifiedExceptionWhenPlateIsNullOrEmpty() {
+        assertThrows(PlateNotSpecifiedException.class, () -> vehicleService.findByPlate(null));
+        assertThrows(PlateNotSpecifiedException.class, () -> vehicleService.findByPlate(""));
+        assertThrows(PlateNotSpecifiedException.class, () -> vehicleService.findByPlate(" "));
+    }
+
+    @Test
+    @DisplayName("Deve lançar PlatePatternDontMatchException se a placa não estiver no padrão")
+    void shouldThrowPlatePatternDontMatchExceptionWhenPlateIsInvalid() {
+        assertThrows(PlatePatternDontMatchException.class, () -> vehicleService.findByPlate("ABC-1234"));
+        assertThrows(PlatePatternDontMatchException.class, () -> vehicleService.findByPlate("123 4567"));
+        assertThrows(PlatePatternDontMatchException.class, () -> vehicleService.findByPlate("12@#123"));
+    }
+
+    @Test
+    @DisplayName("Deve lançar VehicleNotFoundException quando o veículo não existe para a placa informada")
+    void shouldThrowVehicleNotFoundExceptionWhenPlateNotFound() {
+        String plate = "abc1234";
+
+        when(vehicleRepository.findByPlate("ABC1234")).thenReturn(Optional.empty());
+
+        assertThrows(VehicleNotFoundException.class, () -> vehicleService.findByPlate(plate));
+        verify(vehicleRepository).findByPlate("ABC1234");
+    }
+
 }

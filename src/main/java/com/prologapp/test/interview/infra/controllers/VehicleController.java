@@ -6,7 +6,6 @@ import com.prologapp.test.interview.infra.services.VehicleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -82,6 +81,27 @@ public class VehicleController {
     public ResponseEntity<VehicleWithTiresResponse> getVehicleByIdWithTires(@PathVariable Long id) {
 
         return ResponseEntity.ok(vehicleService.findByIdWithTires(id));
+    }
+
+    @Operation(
+            summary = "Busca veículo pela placa (sem pneus)",
+            description = "Retorna as informações de um veículo específico pela sua placa"
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Veículo encontrado",
+            content = @Content(schema = @Schema(implementation = VehicleResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Nenhum veículo encontrado",
+            content = @Content(schema = @Schema(implementation = ApiError.class))
+    )
+    @GetMapping("/plate/{plate}")
+    public ResponseEntity<VehicleResponse> getVehicleByIdWithTires(@PathVariable String plate) {
+
+        return ResponseEntity.ok(vehicleService.findByPlate(plate));
+
     }
 
 }

@@ -12,6 +12,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Builder(toBuilder = true)
@@ -50,5 +51,13 @@ public class Vehicle {
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<VehicleTire> tires;
+
+    @PrePersist
+    @PreUpdate
+    private void formatPlate() {
+        if (Objects.nonNull(plate)) {
+            plate = plate.toUpperCase();
+        }
+    }
 
 }

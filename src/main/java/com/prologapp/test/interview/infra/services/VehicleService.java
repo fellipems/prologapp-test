@@ -11,6 +11,7 @@ import com.prologapp.test.interview.infra.mappers.VehicleMapper;
 import com.prologapp.test.interview.infra.mappers.VehicleResponseMapper;
 import com.prologapp.test.interview.infra.repositories.BrandRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleRepository;
+import io.micrometer.common.util.StringUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -64,5 +66,20 @@ public class VehicleService {
                 .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
 
         return vehicleResponseMapper.toVehicleWithTiresResponse(vehicle);
+    }
+
+    public VehicleResponse findByPlate(String plate) {
+        if (StringUtils.isBlank(plate)) {
+            throw new PlateNotSpecifiedException("Placa não informada");
+        }
+
+        if (!Pattern.matches("^[A-Za-z0-9]{7,8}$", plate)) {
+            throw new PlatePatternDontMatchException("A placa deve conter apenas letras e números, sem hífen ou espaços (ex: ABC1234)");
+        }
+
+        Vehicle vehicle = vehicleRepository.findByPlate(plate.toUpperCase())
+                .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
+
+        return vehicleResponseMapper.toResponse(vehicle);
     }
 }

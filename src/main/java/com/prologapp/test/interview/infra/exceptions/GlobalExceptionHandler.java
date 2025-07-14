@@ -165,6 +165,30 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(PlatePatternDontMatchException.class)
+    public ResponseEntity<ApiError> handlePlatePatternDontMatchException(PlatePatternDontMatchException ex, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST).body(
+                        ApiError.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(PlateNotSpecifiedException.class)
+    public ResponseEntity<ApiError> handlePlateNotSpecifiedException(PlateNotSpecifiedException ex, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST).body(
+                        ApiError.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiError> handleNotFound(NoSuchElementException ex, WebRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
