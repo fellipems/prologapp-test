@@ -21,6 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -134,22 +138,26 @@ public class VehicleServiceTest {
     }
 
     @Test
-    @DisplayName("Deve retornar todos os veículos cadastrados sem os pneus")
-    void shouldReturnAllVehicles() {
+    @DisplayName("Deve retornar página de veículos cadastrados sem os pneus")
+    void shouldReturnAllVehiclesPageable() {
+        Pageable pageable = PageRequest.of(0, 2);
         List<Vehicle> vehicles = Arrays.asList(mock(Vehicle.class), mock(Vehicle.class));
+        Page<Vehicle> pageVehicles = new PageImpl<>(vehicles, pageable, vehicles.size());
 
         List<VehicleResponse> vehiclesResponseList = Arrays.asList(
                 mock(VehicleResponse.class), mock(VehicleResponse.class)
         );
 
-        when(vehicleRepository.findAll()).thenReturn(vehicles);
-        when(vehicleResponseMapper.toResponseList(vehicles)).thenReturn(vehiclesResponseList);
+        when(vehicleRepository.findAll(pageable)).thenReturn(pageVehicles);
+        when(vehicleResponseMapper.toResponse(any(Vehicle.class)))
+                .thenReturn(vehiclesResponseList.get(0), vehiclesResponseList.get(1));
 
-        List<VehicleResponse> allVehicles = vehicleService.getAllVehicles();
+        Page<VehicleResponse> result = vehicleService.getAllVehicles(pageable);
 
-        assertEquals(2, allVehicles.size());
-        verify(vehicleRepository).findAll();
-        verify(vehicleResponseMapper).toResponseList(vehicles);
+        assertEquals(2, result.getTotalElements());
+        assertEquals(2, result.getContent().size());
+        verify(vehicleRepository).findAll(pageable);
+        verify(vehicleResponseMapper, times(2)).toResponse(any(Vehicle.class));
     }
 
     @Test

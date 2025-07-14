@@ -13,9 +13,10 @@ import com.prologapp.test.interview.infra.repositories.BrandRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,10 +31,9 @@ public class VehicleService {
 
     private final VehicleResponseMapper vehicleResponseMapper;
 
-    public List<VehicleResponse> getAllVehicles() {
-        List<Vehicle> vehicles = vehicleRepository.findAll();
-
-        return vehicleResponseMapper.toResponseList(vehicles);
+    public Page<VehicleResponse> getAllVehicles(Pageable pageable) {
+        return vehicleRepository.findAll(pageable)
+                .map(vehicleResponseMapper::toResponse);
     }
 
     public Vehicle create(@Valid CreateVehicleRequest newVehicle) {
