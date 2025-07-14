@@ -7,10 +7,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -19,6 +16,7 @@ import java.util.List;
 @Entity
 @Builder(toBuilder = true)
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Vehicle {

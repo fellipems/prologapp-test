@@ -30,7 +30,7 @@ public class Tire {
     private Long id;
 
     @Column(name = "fire_number", nullable = false, unique = true)
-    @NotBlank
+    @NotBlank(message = "Número de fogo não pode ser vazio")
     private String fireNumber;
 
     @ManyToOne(optional = false)
@@ -38,8 +38,8 @@ public class Tire {
     private Brand brand;
 
     @Column(name = "pressure_psi", nullable = false)
-    @Min(0)
-    @Max(150)
+    @Min(value = 0, message = "Valor minímo de pressão psi deve ser maior que 0")
+    @Max(value = 150, message = "Valor máximo de pressão psi permitido é de 150")
     private int pressurePsi;
 
     @Enumerated(EnumType.STRING)
