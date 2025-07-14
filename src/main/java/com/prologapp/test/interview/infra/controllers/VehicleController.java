@@ -127,4 +127,23 @@ public class VehicleController {
         return ResponseEntity.ok(updated);
     }
 
+    @Operation(
+            summary = "Deletar veículo",
+            description = "Remove um veículo do sistema. Se houver pneus vinculados, eles serão desvinculados e ficarão disponíveis."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "Veículo deletado com sucesso"
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Veículo não encontrado",
+            content = @Content(schema = @Schema(implementation = ApiError.class))
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        vehicleService.delete(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

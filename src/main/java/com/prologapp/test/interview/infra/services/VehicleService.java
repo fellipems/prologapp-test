@@ -1,8 +1,11 @@
 package com.prologapp.test.interview.infra.services;
 
 import com.prologapp.test.interview.domain.entities.Brand;
+import com.prologapp.test.interview.domain.entities.Tire;
 import com.prologapp.test.interview.domain.entities.Vehicle;
+import com.prologapp.test.interview.domain.entities.VehicleTire;
 import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
+import com.prologapp.test.interview.domain.enums.TireStatusEnum;
 import com.prologapp.test.interview.domain.enums.VehicleStatusEnum;
 import com.prologapp.test.interview.infra.dtos.CreateVehicleRequest;
 import com.prologapp.test.interview.infra.dtos.VehicleResponse;
@@ -11,14 +14,19 @@ import com.prologapp.test.interview.infra.exceptions.*;
 import com.prologapp.test.interview.infra.mappers.VehicleMapper;
 import com.prologapp.test.interview.infra.mappers.VehicleResponseMapper;
 import com.prologapp.test.interview.infra.repositories.BrandRepository;
+import com.prologapp.test.interview.infra.repositories.TireRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleRepository;
+import com.prologapp.test.interview.infra.repositories.VehicleTireRepository;
 import io.micrometer.common.util.StringUtils;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -33,6 +41,10 @@ public class VehicleService {
     private final VehicleMapper vehicleMapper;
 
     private final VehicleResponseMapper vehicleResponseMapper;
+
+    private final TireRepository tireRepository;
+
+    private final VehicleTireRepository vehicleTireRepository;
 
     public Page<VehicleResponse> getAllVehicles(Pageable pageable) {
         return vehicleRepository.findAll(pageable)
@@ -91,5 +103,26 @@ public class VehicleService {
         vehicle.setStatus(status);
 
         return vehicleResponseMapper.toResponse(vehicleRepository.save(vehicle));
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new VehicleNotFoundException("Nenhum veículo encontrado"));
+
+        List<VehicleTire> tires = vehicle.getTires(); // ou vehicleTireRepository.findByVehicleId(id);
+
+        if (!CollectionUtils.isEmpty(tires)) {
+            for (VehicleTire vehicleTire : tires) {
+                Tire tire = vehicleTire.getTire();
+                tire.setStatus(TireStatusEnum.AVAILABLE);
+
+                tireRepository.save(tire);
+
+                vehicleTireRepository.delete(vehicleTire);
+            }
+        }
+
+        vehicleRepository.delete(vehicle);
     }
 }

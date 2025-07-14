@@ -1,7 +1,9 @@
 package com.prologapp.test.interview.infra.service;
 
 import com.prologapp.test.interview.domain.entities.Brand;
+import com.prologapp.test.interview.domain.entities.Tire;
 import com.prologapp.test.interview.domain.entities.Vehicle;
+import com.prologapp.test.interview.domain.entities.VehicleTire;
 import com.prologapp.test.interview.domain.enums.BrandTypeEnum;
 import com.prologapp.test.interview.domain.enums.TireStatusEnum;
 import com.prologapp.test.interview.domain.enums.VehicleStatusEnum;
@@ -13,7 +15,9 @@ import com.prologapp.test.interview.infra.exceptions.*;
 import com.prologapp.test.interview.infra.mappers.VehicleMapper;
 import com.prologapp.test.interview.infra.mappers.VehicleResponseMapper;
 import com.prologapp.test.interview.infra.repositories.BrandRepository;
+import com.prologapp.test.interview.infra.repositories.TireRepository;
 import com.prologapp.test.interview.infra.repositories.VehicleRepository;
+import com.prologapp.test.interview.infra.repositories.VehicleTireRepository;
 import com.prologapp.test.interview.infra.services.VehicleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +31,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +51,12 @@ public class VehicleServiceTest {
 
     @Mock
     VehicleResponseMapper vehicleResponseMapper;
+
+    @Mock
+    TireRepository tireRepository;
+
+    @Mock
+    VehicleTireRepository vehicleTireRepository;
 
     @InjectMocks
     VehicleService vehicleService;
@@ -283,6 +294,67 @@ public class VehicleServiceTest {
         verify(vehicleRepository).findById(id);
         verify(vehicleRepository, never()).save(any());
         verify(vehicleResponseMapper, never()).toResponse(any());
+    }
+
+    @Test
+    @DisplayName("Deve remover o veículo, desvincular os pneus e atualizar status dos pneus para AVAILABLE")
+    void shouldDeleteVehicleAndUnlinkTires() {
+        Long vehicleId = 1L;
+        Vehicle vehicle = mock(Vehicle.class);
+        VehicleTire vt1 = mock(VehicleTire.class);
+        VehicleTire vt2 = mock(VehicleTire.class);
+        Tire tire1 = mock(Tire.class);
+        Tire tire2 = mock(Tire.class);
+
+        List<VehicleTire> tires = Arrays.asList(vt1, vt2);
+
+        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
+        when(vehicle.getTires()).thenReturn(tires);
+        when(vt1.getTire()).thenReturn(tire1);
+        when(vt2.getTire()).thenReturn(tire2);
+
+        vehicleService.delete(vehicleId);
+
+        verify(tire1).setStatus(TireStatusEnum.AVAILABLE);
+        verify(tire2).setStatus(TireStatusEnum.AVAILABLE);
+        verify(tireRepository).save(tire1);
+        verify(tireRepository).save(tire2);
+        verify(vehicleTireRepository).delete(vt1);
+        verify(vehicleTireRepository).delete(vt2);
+        verify(vehicleRepository).delete(vehicle);
+    }
+
+    @Test
+    @DisplayName("Deve remover o veículo mesmo que não haja pneus vinculados")
+    void shouldDeleteVehicleWithNoTires() {
+        Long vehicleId = 2L;
+        Vehicle vehicle = mock(Vehicle.class);
+
+        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.of(vehicle));
+        when(vehicle.getTires()).thenReturn(Collections.emptyList());
+
+        vehicleService.delete(vehicleId);
+
+        verify(vehicleRepository).delete(vehicle);
+
+        verifyNoInteractions(tireRepository, vehicleTireRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar VehicleNotFoundException se o veículo não existir")
+    void shouldThrowExceptionIfVehicleNotFound() {
+        Long vehicleId = 3L;
+        when(vehicleRepository.findById(vehicleId)).thenReturn(Optional.empty());
+
+        VehicleNotFoundException ex = assertThrows(
+                VehicleNotFoundException.class,
+                () -> vehicleService.delete(vehicleId)
+        );
+
+        assertEquals("Nenhum veículo encontrado", ex.getMessage());
+        verify(vehicleRepository).findById(vehicleId);
+
+        verifyNoMoreInteractions(vehicleRepository, tireRepository, vehicleTireRepository);
     }
 
 }
