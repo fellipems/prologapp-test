@@ -189,6 +189,30 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(TireIsLinkedException.class)
+    public ResponseEntity<ApiError> handleTireIsLinkedException(TireIsLinkedException ex, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST).body(
+                        ApiError.of(
+                                HttpStatus.BAD_REQUEST.value(),
+                                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
+    @ExceptionHandler(TireNotFoundException.class)
+    public ResponseEntity<ApiError> handleTireNotFoundException(TireNotFoundException ex, WebRequest request) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND).body(
+                        ApiError.of(
+                                HttpStatus.NOT_FOUND.value(),
+                                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                                ex.getMessage()
+                        )
+                );
+    }
+
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiError> handleNotFound(NoSuchElementException ex, WebRequest request) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

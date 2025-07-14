@@ -4,8 +4,8 @@ INSERT INTO brand (name, type) VALUES ('Mercedes', 'VEHICLE');
 INSERT INTO brand (name, type) VALUES ('Pirelli', 'TIRE');
 INSERT INTO brand (name, type) VALUES ('Bridgestone', 'TIRE');
 
-INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('188', 3, 100, 'AVAILABLE');
-INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('178', 3, 98, 'AVAILABLE');
+INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('188', 3, 100, 'IN_USE');
+INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('178', 3, 98, 'IN_USE');
 INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('289', 4, 102, 'AVAILABLE');
 INSERT INTO tire (fire_number, brand_id, pressure_psi, status) VALUES ('18', 4, 97, 'AVAILABLE');
 

@@ -110,4 +110,15 @@ public class TireService {
         tireRepository.save(tire);
     }
 
+    @Transactional
+    public void delete(Long tireId) {
+        Tire tire = tireRepository.findById(tireId)
+                .orElseThrow(() -> new TireNotFoundException("Pneu não encontrado"));
+
+        if (!TireStatusEnum.AVAILABLE.equals(tire.getStatus())) {
+            throw new TireIsLinkedException("Pneu está vinculado a um veículo e não pode ser removido. Desvincule para excluir o pneu");
+        }
+
+        tireRepository.delete(tire);
+    }
 }

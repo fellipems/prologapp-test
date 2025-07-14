@@ -287,4 +287,53 @@ public class TireServiceTest {
         assertThrows(TireNotLinkedException.class, () -> tireService.unlinkTireFromVehicle(request));
     }
 
+    @Test
+    @DisplayName("Deve remover o pneu quando estiver disponível (AVAILABLE)")
+    void shouldDeleteTireWhenAvailable() {
+        Long tireId = 1L;
+        Tire tire = mock(Tire.class);
+
+        when(tireRepository.findById(tireId)).thenReturn(Optional.of(tire));
+        when(tire.getStatus()).thenReturn(TireStatusEnum.AVAILABLE);
+
+        tireService.delete(tireId);
+
+        verify(tireRepository).findById(tireId);
+        verify(tireRepository).delete(tire);
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção se o pneu não existir")
+    void shouldThrowExceptionIfTireNotFound() {
+        Long tireId = 2L;
+        when(tireRepository.findById(tireId)).thenReturn(Optional.empty());
+
+        TireNotFoundException ex = assertThrows(
+                TireNotFoundException.class,
+                () -> tireService.delete(tireId)
+        );
+
+        assertEquals("Pneu não encontrado", ex.getMessage());
+        verify(tireRepository).findById(tireId);
+        verify(tireRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar exceção se o pneu estiver em uso")
+    void shouldThrowExceptionIfTireIsLinked() {
+        Long tireId = 3L;
+        Tire tire = mock(Tire.class);
+        when(tireRepository.findById(tireId)).thenReturn(Optional.of(tire));
+        when(tire.getStatus()).thenReturn(TireStatusEnum.IN_USE);
+
+        TireIsLinkedException ex = assertThrows(
+                TireIsLinkedException.class,
+                () -> tireService.delete(tireId)
+        );
+
+        assertEquals("Pneu está vinculado a um veículo e não pode ser removido. Desvincule para excluir o pneu", ex.getMessage());
+        verify(tireRepository).findById(tireId);
+        verify(tireRepository, never()).delete(any());
+    }
+
 }

@@ -13,10 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/tires")
@@ -54,6 +51,19 @@ public class TireController {
     @PostMapping("/unlink")
     public ResponseEntity<Void> unlinkTire(@RequestBody UnlinkTireRequest request) {
         tireService.unlinkTireFromVehicle(request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(
+            summary = "Remover pneu",
+            description = "Remove um pneu do sistema, desde que não esteja vinculado a nenhum veículo."
+    )
+    @ApiResponse(responseCode = "200", description = "Pneu removido com sucesso")
+    @ApiResponse(responseCode = "400", description = "Pneu está vinculado a um veículo e não pode ser removido", content = @Content(schema = @Schema(implementation = ApiError.class)))
+    @ApiResponse(responseCode = "404", description = "Pneu não encontrado", content = @Content(schema = @Schema(implementation = ApiError.class)))
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        tireService.delete(id);
         return ResponseEntity.ok().build();
     }
 
